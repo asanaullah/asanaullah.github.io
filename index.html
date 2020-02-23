@@ -1,9 +1,18 @@
+---
+show_sidebar = 1
+title = Home
+---
 <!doctype html>
 <html>
   <head>
     <meta charset="utf-8">
-    <title>Home</title>
+    <title>{{ page.title }} </title>
   </head>
+  {% if page.show_sidebar %}
+  <div class="sidebar">
+    sidebar content
+  </div>
+  {% endif %}
   <body>
     <h1>Programming FPGAs: The Open Source Way</h1>
   </body>
