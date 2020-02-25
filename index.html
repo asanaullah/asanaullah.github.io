@@ -53,7 +53,7 @@
 						<div>
 							<span class="icon fa-users"></span>
 							<h3>Elasticity</h3>
-							<p style = "color:#d7deda;">Multiplexing, sharing and scaling <br>hardware between multiple tenants</p>
+							<p style = "color:#d7deda;">Multiplexing, sharing and scaling <br>hardware between multiple tenants/FPGAs</p>
 						</div>
 
 						<div>
@@ -80,14 +80,23 @@
 
 		<!-- Three -->
 			<section id="three" class="wrapper align-center">
-				<h1 style =font-size:2.5vw;color:black;">FPGA Development Overview </h1>
+				<header>
+				<h2 >FPGA Development Overview </h1>
+				</header>
 				<div class="inner">
 					<div class="flex flex-2">
 						<article style = "position: -webkit-sticky;  position: sticky; top: 0;">
-							<img src="images/index/overview.svg"  alt="Pic 01" />
+							<img src="images/index/overview.svg" style="width:95%"  alt="Pic 01" />
 						</article>
-						<article> <p> This is a sample text  This is a sample text  This is a sample text  This is a sample text  This is a sample text  This is a sample text  This is a sample text  This is a sample text  This is a sample text  This is a sample text  This is a sample text  This is a sample text  This is a sample text  This is a sample text  This is a sample text  This is a sample text  This is a sample text  This is a sample text  This is a sample text  This is a sample text  This is a sample text  This is a sample text  This is a sample text  This is a sample text  This is a sample text  This is a sample text  This is a sample text  This is a sample text  This is a sample text  This is a sample text  This is a sample text  This is a sample text  This is a sample text  This is a sample text  This is a sample text  This is a sample text  This is a sample text  This is a sample text  This is a sample text  This is a sample text  This is a sample text  This is a sample text  This is a sample text  This is a sample text  This is a sample text  This is a sample text  This is a sample text  This is a sample text  This is a sample text  This is a sample text  This is a sample text  This is a sample text  This is a sample text  This is a sample text  This is a sample text  This is a sample text  This is a sample text  This is a sample text  This is a sample text  This is a sample text  This is a sample text  This is a sample text </p> </article>
-						
+						<article> 
+							<p  style="color:black">  HaaRNESS aims to provide 
+							
+							
+							
+							
+							
+							</p> 
+						</article>
 						<article> </article>
 						
 						<article style="margin-bottom:3em">
@@ -97,8 +106,8 @@
 							<header>
 								<h3>High Level Synthesis</h3>
 							</header>
-							<p> </p>
-							<footer>
+							<p style="color:black"> High Level Synthesis (HLS) deals with generating hardware from High Level Language (HLL) code, typically by mapping HLL code fragments to a library of vendor IP blocks. Our goal is to bridge the performance-programmability gap that traditionally  exists for HLS compilers, so that high quality hardware can be automatically inferred, generated without using vendor IP, and integrated into HLL application codes written without prior expertise in hardware programming. </p>
+							<footer  id="access">
 								<a href="hls_blog.html" class="button">Learn More</a>
 							</footer>
 							<div class="image round">
@@ -107,68 +116,82 @@
 							<header>
 								<h3>Custom HDL Library</h3>
 							</header>
-							<p> </p>
-							<footer>
+							<p  style="color:black"> 
+								HDL libraries define hardware components that are too complex to be expressed through the limited semantics of HLL code, are critical to performance and/or must have a minimal resource overhead. Examples of these include external interface controllers (e.g. DRAM, PCIe, Ethernet), data structures (e.g. interleaved memory) and soft cores (e.g. RISCV, NIOS, Microblaze). Our goal is to build an open source library of custom HDL components that can be fully modified, is not tied to a specific vendor or FPGA family, utilizes well defined APIs, and has been tested/verified.      
+							</p>
+							<footer  id="access">
 								<a href="ip_blog.html" class="button">Learn More</a>
 							</footer>
 							<div class="image round">
 								<img src="images/index/sim.jpg"  alt="Pic 04" />
 							</div>
 							<header>
-								<h3>Cycle Accurate Simulation of Hardware Code </h3>
+								<h3>RTL Simulation</h3>
 							</header>
-							<p> </p>
-							<footer>
+							<p  style="color:black"> RTL simulation provides a cycle accurate estimate of hardware performance, and does so within orders of magnitude smaller timeframes than actually compiling to hardware. Our goal is to extend RTL simulation to HLS, and to do so in an automated manner which abstracts the process complexity. This will allow dynamic profiling of HLL code and, by extension, faster turnover for design optimization iterations.   </p>
+							<footer  id="access">
 								<a href="sim_blog.html" class="button">Learn More</a>
 							</footer>
 							<div class="image round">
 								<img src="images/index/gen.jpg" alt="Pic 05" />
 							</div>
 							<header>
-								<h3>Hardware Generation: Synthesis and Place&Route</h3>
+								<h3>Hardware Generation</h3>
 							</header>
-							<p> </p>
-							<footer>
+							<p  style="color:black"> 
+								Hardware generation, simply put, is a two step process. First the behavioral representation of hardware, given in HDL, is mapped to logic gates using a process called Synthesis. Then, this logical representation is mapped to a physical implementation utilizing the target FPGA's actual resources (LUTs, Flip Flops, carry chains, memory blocks, DSP blocks) using a process called Place & Route (P&R). P&R acquires information about the low level structure of the FPGA from a database that is unique to that FPGA. This physical implementation is then converted into a bitstream for programming the FPGA. Our goal is to open source this entire process, from HDL to bitstream, so that developers are not tied to vendor specified algorithms or functionality. Instead, they have the freedom to explore the design space for these features that are critical to performance, productivity and security. 
+							
+							</p>
+							<footer  id="access">
 								<a href="gen_blog.html" class="button">Learn More</a>
 							</footer>
 							<div class="image round">
 								<img src="images/index/config.jpg" alt="Pic 06" />
 							</div>
 							<header>
-								<h3>Bitstream Deployment using Full and Partial Reconfiguration</h3>
+								<h3>Hardware Programming</h3>
 							</header>
-							<p> </p>
-							<footer>
+							<p  style="color:black"> 
+								Going from bitstreams to designs running on the board is a non-trivial process since the actual process depends heavily on the context. This context could be the interface over which the bitstream is supplied (PCIe, USB-JTAG, Ethernet, DRAM), the extent of reconfiguration (Full, Partial), the reconfiguration controller (vendor IP, softcore) etc. Our goal is to support open source alternatives for most contexts, and eventually enable mechanisms through which innovation can be supported in this area. 
+							
+							</p>
+							<footer  id="access">
 								<a href="prog_blog.html" class="button">Learn More</a>
 							</footer>
 							<div class="image round">
 								<img src="images/index/swruntime.jpg" alt="Pic 07" />
 							</div>
 							<header>
-								<h3>Software Runtime and OS Integration</h3>
+								<h3>Software Runtime</h3>
 							</header>
-							<p> </p>
-							<footer>
+							<p  style="color:black"> 
+								Software runtime enables the CPU to interface with the FPGA for maintaining device job queus, programming the device, enabling DMA between host application and device buffers, controlling applications running on the device, reporting resource availability to the orchestration manager, and performing many other functions. Our goal is to not only make this software runtime be vendor and board agnostic, but also to provide support so that it does not deprecate with updates to the software stack. 
+							</p>
+							<footer  id="access">
 								<a href="swruntime_blog.html" class="button">Learn More</a>
 							</footer>
 							<div class="image round">
 								<img src="images/index/rhos.jpg" alt="Pic 08" />
 							</div>
 							<header>
-								<h3>Reconfigurable Hardware Operating Systems</h3>
+								<h3>RHOS/Shell</h3>
 							</header>
-							<p> </p>
-							<footer>
+							<p   style="color:black"> 
+								A Reconfigurable Hardware Operating System (RHOS) - also known as the Shell - is analogous to the software OS i.e. it provides support for deploying applications, multiplexing resources between multiple FPGA tenants, isolating these tenants, providing existing implementations of core logic such as external interface controllers, providing reconfiguration support etc. Currently, Shells are built to be ad hoc, with each service provider building their own version that targets their specific deployment configuration and use cases. Our goal is to build a true RHOS that can support a diverse and dynamic set of configurations/user-cases, and utilizes well defined APIs so that components can be added, removed and modified easily. 							
+							</p  style="color:black">
+							<footer  id="access">
 								<a href="rhos_blog.html" class="button">Learn More</a>
 							</footer>
 							<div class="image round">
 								<img src="images/index/projects.jpg" alt="Pic 09" />
 							</div>
 							<header>
-								<h3>Projects Using A Fully Open Toolchain</h3>
+								<h3>Projects</h3>
 							</header>
-							<p> </p>
-							<footer>
+							<p  style="color:black"> 
+								Our goal here is build prototypes which demonstrate functionality and performance using an open source toolchain.
+							</p>
+							<footer  id="access">
 								<a href="projects.html" class="button">Learn More</a>
 							</footer>
 						</article>
