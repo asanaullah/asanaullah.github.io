@@ -1,3 +1,5 @@
+---
+---
 <!DOCTYPE HTML>
 <!--
 	Projection by TEMPLATED
@@ -6,7 +8,7 @@
 -->
 <html>
 	<head>
-		<title>About</title>
+		<title>Overview</title>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<link rel="stylesheet" href="assets/css/main.css" />
@@ -33,19 +35,42 @@
 				</div>
 			</header>
 
+			
+			
+			
+			
+			
+			
 		<!-- Three -->
 			<section id="three" class="wrapper">
 					<header class="align-center">
 						<h2>Overview</h2>
-						<p> </p>
 					</header>
+					<ul>
+							{% for post in site.posts %}
+								{% if post.category == "overview" %}
+								<li style="margin-left:5em;margin-right:5em;border:1px solid #000;" >
+									<h3><a href="{{ post.url }}">{{ post.article }}</a></h3>
+									<p3>{{ page.date | date_to_string }} - {{ page.author }}</p3>
+										<p3>{{ post.excerpt }}</p3>
+									</li>
+							{% endif %}
+							{% endfor %}
+						</ul>
 			</section>
 
+			
+			
+			
+			
+			
+			
+			
+			
+			
 		<!-- Footer -->
 			<footer id="footer">
 				<div class="inner">
-
-
 					<div class="copyright">
 						&copy; Design adapted from: <a href="https://templated.co">TEMPLATED</a>
 					</div>
