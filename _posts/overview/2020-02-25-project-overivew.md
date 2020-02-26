@@ -1,6 +1,6 @@
 ---
 author: Ahmed Sanaullah
-category: overview
+category: Overview
 layout: blogpost
 article: Building an Open Source Toolchain for an FPGA
 ---
