@@ -1,47 +1,4 @@
-<!DOCTYPE HTML>
-<!--
-	Projection by TEMPLATED
-	templated.co @templatedco
-	Released for free under the Creative Commons Attribution 3.0 license (templated.co/license)
--->
-<html>
-	<head>
-		<title>Project Overivew</title>
-		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<link rel="stylesheet" href="/assets/css/main.css" />
-	</head>
-	<body class="subpage">
-
-		<!-- Header -->
-			<header id="header">
-				<div class="inner" >
-					<p  class="logo">Open Source FPGA Tooling for <strong>Datacenters and Edge</strong></p>
-					<nav id="nav">
-						<a style="color:white;font-weight:bold;" href="/index.html">Home</a>
-						<a style="color:white;font-weight:bold;" href="/about.html">Overview</a>
-						<a style="color:white;font-weight:bold;" href="/hls_blog.html">HLS</a>
-						<a style="color:white;font-weight:bold;" href="/ip_blog.html">IP</a>
-						<a style="color:white;font-weight:bold;" href="/sim_blog.html">Sim</a>
-						<a style="color:white;font-weight:bold;" href="/gen_blog.html">Generation</a>
-						<a style="color:white;font-weight:bold;" href="/prog_blog.html">Prog</a>
-						<a style="color:white;font-weight:bold;" href="/swruntime_blog.html">SW Runtime</a>
-						<a style="color:white;font-weight:bold;" href="/rhos_blog.html">RHOS</a>
-						<a style="color:white;font-weight:bold;" href="/projects.html">Projects</a>
-					</nav>
-					<a href="#navPanel" class="navPanelToggle"><span class="fa fa-bars"></span></a>
-				</div>
-			</header>
-
-		<!-- Three -->
-			<section id="three" class="wrapper" >
-					<header class="align-center">
-						<h2>Building an Open Source Toolchain for an FPGA</h2>
-					</header>
-					<h1 style = "text-align:right; color:black; margin-right:2em; font-weight:bold">25 Feb 2020 - Ahmed Sanaullah</h1>
-					<article style="color:black; margin-left:5em; margin-right:5em">
-						
-						<p2><p>Field Programmable Gate Arrays (FPGAs) are rapidly becoming first-class citizens in the datacenter, instead of niche components. This is because FPGAs i) can achieve high throughput and low latency by implementing a specialized architecture that eliminates a number of bottlenecks and overheads of general purpose computing, ii) consume little power and, by extension, have a high power-performance ratio, iii) have high-speed interconnects and can tightly couple computation with communication to mask the latency of data movement, and iv) can be configured so that each design is tuned for individual use cases.</p>
+I"�<<p>Field Programmable Gate Arrays (FPGAs) are rapidly becoming first-class citizens in the datacenter, instead of niche components. This is because FPGAs i) can achieve high throughput and low latency by implementing a specialized architecture that eliminates a number of bottlenecks and overheads of general purpose computing, ii) consume little power and, by extension, have a high power-performance ratio, iii) have high-speed interconnects and can tightly couple computation with communication to mask the latency of data movement, and iv) can be configured so that each design is tuned for individual use cases.</p>
 
 <p>Figure 1 illustrates the different configurations in which FPGAs are being deployed in a datacenter. Bump-in-the-Wire (BitW) FPGAs process all traffic between a server and a switch to perform application and system function acceleration. Coprocessor FPGAs provide a traditional accelerator configuration, like GPUs, with an optional back-end secondary network for direct connectivity between accelerators. Storage-attached FPGAs process data locally on storage servers to avoid memory copies to compute servers. Stand-alone FPGAs provide a pool of reconfigurable accelerators that can be programmed and interfaced with directly over the network. Smart network interface controllers (NICs) contain embedded FPGAs which perform custom packet processing alongside a NIC ASIC (application-specific integrated circuit). Finally, network switches can also contain embedded FPGAs that process data as the data moves through the datacenter network (e.g., collective operations such as broadcast and all-reduce).</p>
 
@@ -54,7 +11,9 @@
 <p>FPGAs have traditionally lacked the clean, coherent, compatible, and consistent support for code generation and deployment generation that is typically available for traditional central processing units (CPUs). For the most part, previous efforts to address this have been ad hoc and limited in scope. Those who try to address this always do something special due to poor tooling, and the tooling that does exist is insufficient, especially for datacenter and high-performance computing (HPC) applications. This is because of the heavy reliance on proprietary, vendor-specific tools for core operations. These tools can change frequently and significantly, which means that even if we wanted to not be ad hoc, for the most part we couldn’t be without investing a lot of work which could be wiped out with a new generation of FPGAs. Moreover, these tools are not necessarily aimed at providing the most efficient solution since they limit the “flexibility” offered to users. For example, these tools i) do not allow modifications the algorithms for core operations (such as logic optimization and place &amp; route), ii) hide details of (and access to) the underlying device architecture which prevents implementation of important functions (such as logic relocation without recompilation), and iii) are designed to be generic with limited opportunities for customization (such vendor IP blocks). This is not a problem unique to FPGAs, however. Similar issues already exist for software. Therefore, similar to free software in the software world, we must be able to code and deploy custom architectures using transparent, open, end-to-end frameworks that are i) not tied to any vendor, that is, do not use IP blocks or tools that are only compatible with the FPGA boards of a particular vendor, ii) provide opportunities for customization across all levels of the development stack, and iii) can be upstreamed, that is, can be easily and reliably integrated into downstream projects in order to build more complex and intricate systems.</p>
 
 <h7>Hardware as a reconfigurable, elastic, and specialized service</h7>
+<!--more-->
 <p>We refer to our framework for providing upstream support for datacenter FPGAs as “Hardware as a RecoNfigurable, Elastic and Specialized Service” (HaaRNESS). HaaRNESS is built as a high-level synthesis (HLS) tool, which creates and deploys high-quality hardware from algorithms expressed in high-level languages (HLL) such as OpenMP or OpenCL. Developers only specify the algorithm, with minimal use of pragmas and low-level constructs, and hence require virtually no prior expertise in hardware development; this prior expertise is both in terms of hardware-specific languages (e.g HDL), as well as code structures (in HDL and HLL) needed to effectively map design patterns to hardware. A preprocessor transforms this simple HLL code into an FPGA-centric HLL code which removes hardware optimization blockers and helps infer opportunities for parallelism. Then, an HLS compiler converts this FPGA-centric HLL code into HDL (hardware assembly language). The resulting HDL is run through a system generator which can perform one of two operations: i) cycle accurate simulation, or ii) deployment of application logic on the physical FPGA system. In case of the latter, a bitstream compiler maps the HDL code onto the FPGA fabric using Synthesis and Place &amp; Route. Then, a software runtime is used to program the application onto the board and interface with it. Finally, similar to the OS on CPUs, a hardware operating system (OS) is provisioned on the FPGA in order to share the FPGA fabric amongst multiple independent entities.</p>
+
 <h7>HLS code preprocessor</h7>
 <p>Current HLS tools can require developers to explicitly identify opportunities (and constraints) for parallelism, as well as manually implement a number of important design features such as caches, loop coalescing, function inlining, floating point accumultors and  data hazard elimination. This substantially increases the complexity of HLS code that developers need to provide. Our HLS code preprocessor reduces this complexity by automatically identifying optimization blockers in an HLS compiler through compiler instrumentation, and then addressing them using a series of system code transformations. Optimization blockers occur when a compiler writer is not being allowed to infer an optimization.  An optimizing transform may be blocked if it: i) modifies code functionality, instead of structure only, ii) can result in a failure to compile, iii) is based on information available at run-time, iv) requires a global view of the computation, and/or v) is based on implicit code behavior that may be visible to the developer, but cannot be reliably extracted by the compiler.</p>
 
@@ -95,27 +54,4 @@
 </div>
 
 <p>Since APIs are well defined, Morpheus can be easily modified to support other deployment configurations of FPGAs in the datacenter. This is critical to ensuring compatibility across the stack, enabling portability across FPGAs, and reducing developer effort in integrating their designs into the hardware OS.</p>
-</p2>
-						</article>
-			</section>
-
-		<!-- Footer -->
-			<footer id="footer">
-				<div class="inner">
-
-
-					<div class="copyright">
-						&copy; Design adapted from: <a href="https://templated.co">TEMPLATED</a>
-					</div>
-
-				</div>
-			</footer>
-
-		<!-- Scripts -->
-			<script src="/assets/js/jquery.min.js"></script>
-			<script src="/assets/js/skel.min.js"></script>
-			<script src="/assets/js/util.js"></script>
-			<script src="/assets/js/main.js"></script>
-
-	</body>
-</html>
+:ET

@@ -1,47 +1,4 @@
-<!DOCTYPE HTML>
-<!--
-	Projection by TEMPLATED
-	templated.co @templatedco
-	Released for free under the Creative Commons Attribution 3.0 license (templated.co/license)
--->
-<html>
-	<head>
-		<title>Project Overivew</title>
-		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<link rel="stylesheet" href="/assets/css/main.css" />
-	</head>
-	<body class="subpage">
-
-		<!-- Header -->
-			<header id="header">
-				<div class="inner" >
-					<p  class="logo">Open Source FPGA Tooling for <strong>Datacenters and Edge</strong></p>
-					<nav id="nav">
-						<a style="color:white;font-weight:bold;" href="/index.html">Home</a>
-						<a style="color:white;font-weight:bold;" href="/about.html">Overview</a>
-						<a style="color:white;font-weight:bold;" href="/hls_blog.html">HLS</a>
-						<a style="color:white;font-weight:bold;" href="/ip_blog.html">IP</a>
-						<a style="color:white;font-weight:bold;" href="/sim_blog.html">Sim</a>
-						<a style="color:white;font-weight:bold;" href="/gen_blog.html">Generation</a>
-						<a style="color:white;font-weight:bold;" href="/prog_blog.html">Prog</a>
-						<a style="color:white;font-weight:bold;" href="/swruntime_blog.html">SW Runtime</a>
-						<a style="color:white;font-weight:bold;" href="/rhos_blog.html">RHOS</a>
-						<a style="color:white;font-weight:bold;" href="/projects.html">Projects</a>
-					</nav>
-					<a href="#navPanel" class="navPanelToggle"><span class="fa fa-bars"></span></a>
-				</div>
-			</header>
-
-		<!-- Three -->
-			<section id="three" class="wrapper" >
-					<header class="align-center">
-						<h2>Building an Open Source Toolchain for an FPGA</h2>
-					</header>
-					<h1 style = "text-align:right; color:black; margin-right:2em; font-weight:bold">25 Feb 2020 - Ahmed Sanaullah</h1>
-					<article style="color:black; margin-left:5em; margin-right:5em">
-						
-						<p2><p>Field Programmable Gate Arrays (FPGAs) are rapidly becoming first-class citizens in the datacenter, instead of niche components. This is because FPGAs i) can achieve high throughput and low latency by implementing a specialized architecture that eliminates a number of bottlenecks and overheads of general purpose computing, ii) consume little power and, by extension, have a high power-performance ratio, iii) have high-speed interconnects and can tightly couple computation with communication to mask the latency of data movement, and iv) can be configured so that each design is tuned for individual use cases.</p>
+I"³<<p>Field Programmable Gate Arrays (FPGAs) are rapidly becoming first-class citizens in the datacenter, instead of niche components. This is because FPGAs i) can achieve high throughput and low latency by implementing a specialized architecture that eliminates a number of bottlenecks and overheads of general purpose computing, ii) consume little power and, by extension, have a high power-performance ratio, iii) have high-speed interconnects and can tightly couple computation with communication to mask the latency of data movement, and iv) can be configured so that each design is tuned for individual use cases.</p>
 
 <p>Figure 1 illustrates the different configurations in which FPGAs are being deployed in a datacenter. Bump-in-the-Wire (BitW) FPGAs process all traffic between a server and a switch to perform application and system function acceleration. Coprocessor FPGAs provide a traditional accelerator configuration, like GPUs, with an optional back-end secondary network for direct connectivity between accelerators. Storage-attached FPGAs process data locally on storage servers to avoid memory copies to compute servers. Stand-alone FPGAs provide a pool of reconfigurable accelerators that can be programmed and interfaced with directly over the network. Smart network interface controllers (NICs) contain embedded FPGAs which perform custom packet processing alongside a NIC ASIC (application-specific integrated circuit). Finally, network switches can also contain embedded FPGAs that process data as the data moves through the datacenter network (e.g., collective operations such as broadcast and all-reduce).</p>
 
@@ -95,27 +52,4 @@
 </div>
 
 <p>Since APIs are well defined, Morpheus can be easily modified to support other deployment configurations of FPGAs in the datacenter. This is critical to ensuring compatibility across the stack, enabling portability across FPGAs, and reducing developer effort in integrating their designs into the hardware OS.</p>
-</p2>
-						</article>
-			</section>
-
-		<!-- Footer -->
-			<footer id="footer">
-				<div class="inner">
-
-
-					<div class="copyright">
-						&copy; Design adapted from: <a href="https://templated.co">TEMPLATED</a>
-					</div>
-
-				</div>
-			</footer>
-
-		<!-- Scripts -->
-			<script src="/assets/js/jquery.min.js"></script>
-			<script src="/assets/js/skel.min.js"></script>
-			<script src="/assets/js/util.js"></script>
-			<script src="/assets/js/main.js"></script>
-
-	</body>
-</html>
+:ET
