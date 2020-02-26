@@ -49,12 +49,13 @@
 					<ul>
 							{% for post in site.posts %}
 								{% if post.category == page.category %}
-								<article style="margin-left:5em;margin-right:5em;border:1px solid grey; padding:1em 1em 1em 1em" >
+								<article style="margin-left:5em;margin-right:5em;border:1px solid grey; padding:1em 1em 1em 1em; background-color:#f0f0f0" >
 									<h7><a href="{{ post.url }}">{{ post.article }}</a></h7>
 									<br>
 									<div style="text-align:right;">
-										<p3><b>{{ post.date | date_to_string }} - {{ post.author }}</b></p3>
+										<p3><b>{{ post.date | date_to_string }} - <a href="contact.html">{{ post.author }}</a></b></p3>
 									</div>
+									<br>
 									<p3>{{ post.excerpt }}</p3>
 									<div style="text-align:right;margin-top:-2em">
 										<p3 ><a href="{{ post.url }}">Read More</a></p3>
