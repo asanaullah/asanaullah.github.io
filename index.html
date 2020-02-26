@@ -87,14 +87,14 @@
 				</header>
 				<div class="inner">
 					<div class="flex flex-2">
-						<article style = "position: -webkit-sticky;  position: sticky; top: 0;">
+						<article style = "position: -webkit-sticky;  position: sticky; top: 0;z-index:100;">
 						<header>
 								<h3>FPGA Development Flow</h3>
 							</header>
 							<img src="images/index/overview.svg" style="width:95%"  alt="Pic 01" />
 						</article>
 						<article> 
-							<p  style="color:black">  <b>HaaRNESS</b> aims to deliver on the benefits of high performance and low power that FPGAs can provide in the Data Center and the Edge. But to be able to do this requires improvements to the way we leverage the technology across both the Software and Hardware stacks. FPGA tooling today is proprietary, expensive, limited, vulnerable and out-dated. It relies heavily on expertise in hardware programming, requires application developers to build entire ad hoc systems, restricts modifications to core algorithms for hardware inference and generation, requires individual licenses for multiple tools/features which are essential for productivity, provides inefficient implementations for certain important functions (if at all), exposes a large number of attack surfaces, and has poor compatibility  across vendors and boards. 
+							<p  style="color:black;text-align:justify">  <b>HaaRNESS</b> aims to deliver on the benefits of high performance and low power that FPGAs can provide in the Data Center and the Edge. But to be able to do this requires improvements to the way we leverage the technology across both the Software and Hardware stacks. FPGA tooling today is proprietary, expensive, limited, vulnerable and out-dated. It relies heavily on expertise in hardware programming, requires application developers to build entire ad hoc systems, restricts modifications to core algorithms for hardware inference and generation, requires individual licenses for multiple tools/features which are essential for productivity, provides inefficient implementations for certain important functions (if at all), exposes a large number of attack surfaces, and has poor compatibility  across vendors and boards. 
 							<br>
 							<br>
 							Through <b>HaaRNESS</b>, our goal is to enable research and innovation across the entire FPGA development flow, so that we can address the limitations of current toolchains at all levels. This includes how we express our designs (abstractions, libraries), how we test them, how we map these designs to actual FPGA boards, how we then program these boards, and how we use software and hardware runtime to deploy and interact with these designs. 
@@ -112,7 +112,7 @@
 							<header>
 								<h3>High Level Synthesis</h3>
 							</header>
-							<p style="color:black"> High Level Synthesis (HLS) deals with generating hardware from High Level Language (HLL) code, typically by mapping HLL code fragments to a library of vendor IP blocks. Our goal is to bridge the performance-programmability gap that traditionally  exists for HLS compilers, so that high quality hardware can be automatically inferred, generated without using vendor IP, and integrated into HLL application codes written without prior expertise in hardware programming. </p>
+							<p style="color:black;text-align:justify"> High Level Synthesis (HLS) deals with generating hardware from High Level Language (HLL) code, typically by mapping HLL code fragments to a library of vendor IP blocks. Our goal is to bridge the performance-programmability gap that traditionally  exists for HLS compilers, so that high quality hardware can be automatically inferred, generated without using vendor IP, and integrated into HLL application codes written without prior expertise in hardware programming. </p>
 							<footer  id="access">
 								<a href="hls_blog.html" class="button">Learn More</a>
 							</footer>
@@ -122,7 +122,7 @@
 							<header>
 								<h3>Custom HDL Library</h3>
 							</header>
-							<p  style="color:black"> 
+							<p  style="color:black; text-align:justify"> 
 								HDL libraries define hardware components that are too complex to be expressed through the limited semantics of HLL code, are critical to performance and/or must have a minimal resource overhead. Examples of these include external interface controllers (e.g. DRAM, PCIe, Ethernet), data structures (e.g. interleaved memory) and soft cores (e.g. RISCV, NIOS, Microblaze). Our goal is to build an open source library of custom HDL components that can be fully modified, is not tied to a specific vendor or FPGA family, utilizes well defined APIs, and has been tested/verified.      
 							</p>
 							<footer  id="access">
@@ -134,7 +134,7 @@
 							<header>
 								<h3>RTL Simulation</h3>
 							</header>
-							<p  style="color:black"> RTL simulation provides a cycle accurate estimate of hardware performance, and does so within orders of magnitude smaller timeframes than actually compiling to hardware. Our goal is to extend RTL simulation to HLS, and to do so in an automated manner which abstracts the process complexity. This will allow dynamic profiling of HLL code and, by extension, faster turnover for design optimization iterations.   </p>
+							<p  style="color:black;text-align:justify"> RTL simulation provides a cycle accurate estimate of hardware performance, and does so within orders of magnitude smaller timeframes than actually compiling to hardware. Our goal is to extend RTL simulation to HLS, and to do so in an automated manner which abstracts the process complexity. This will allow dynamic profiling of HLL code and, by extension, faster turnover for design optimization iterations.   </p>
 							<footer  id="access">
 								<a href="sim_blog.html" class="button">Learn More</a>
 							</footer>
@@ -144,7 +144,7 @@
 							<header>
 								<h3>Hardware Generation</h3>
 							</header>
-							<p  style="color:black"> 
+							<p  style="color:black;text-align:justify"> 
 								Hardware generation, simply put, is a two step process. First the behavioral representation of hardware, given in HDL, is mapped to logic gates using a process called Synthesis. Then, this logical representation is mapped to a physical implementation utilizing the target FPGA's actual resources (LUTs, Flip Flops, carry chains, memory blocks, DSP blocks) using a process called Place & Route (P&R). P&R acquires information about the low level structure of the FPGA from a database that is unique to that FPGA. This physical implementation is then converted into a bitstream for programming the FPGA. Our goal is to open source this entire process, from HDL to bitstream, so that developers are not tied to vendor specified algorithms or functionality. Instead, they have the freedom to explore the design space for these features that are critical to performance, productivity and security. 
 							
 							</p>
@@ -157,7 +157,7 @@
 							<header>
 								<h3>Hardware Programming</h3>
 							</header>
-							<p  style="color:black"> 
+							<p  style="color:black;text-align:justify"> 
 								Going from bitstreams to designs running on the board is a non-trivial process since the actual process depends heavily on the context. This context could be the interface over which the bitstream is supplied (PCIe, USB-JTAG, Ethernet, DRAM), the extent of reconfiguration (Full, Partial), the reconfiguration controller (vendor IP, softcore) etc. Our goal is to support open source alternatives for most contexts, and eventually enable mechanisms through which innovation can be supported in this area. 
 							
 							</p>
@@ -170,7 +170,7 @@
 							<header>
 								<h3>Software Runtime</h3>
 							</header>
-							<p  style="color:black"> 
+							<p  style="color:black;text-align:justify"> 
 								Software runtime enables the CPU to interface with the FPGA for maintaining device job queus, programming the device, enabling DMA between host application and device buffers, controlling applications running on the device, reporting resource availability to the orchestration manager, and performing many other functions. Our goal is to not only make this software runtime be vendor and board agnostic, but also to provide support so that it does not deprecate with updates to the software stack. 
 							</p>
 							<footer  id="access">
@@ -182,9 +182,9 @@
 							<header>
 								<h3>RHOS/Shell</h3>
 							</header>
-							<p   style="color:black"> 
+							<p   style="color:black;text-align:justify"> 
 								A Reconfigurable Hardware Operating System (RHOS) - also known as the Shell - is analogous to the software OS i.e. it provides support for deploying applications, multiplexing resources between multiple FPGA tenants, isolating these tenants, providing existing implementations of core logic such as external interface controllers, providing reconfiguration support etc. Currently, Shells are built to be ad hoc, with each service provider building their own version that targets their specific deployment configuration and use cases. Our goal is to build a true RHOS that can support a diverse and dynamic set of configurations/user-cases, and utilizes well defined APIs so that components can be added, removed and modified easily. 							
-							</p  style="color:black">
+							</p>
 							<footer  id="access">
 								<a href="rhos_blog.html" class="button">Learn More</a>
 							</footer>
@@ -194,7 +194,7 @@
 							<header>
 								<h3>Projects</h3>
 							</header>
-							<p  style="color:black"> 
+							<p  style="color:black;text-align:justify"> 
 								Our goal here is build prototypes which demonstrate functionality and performance using an open source toolchain.
 							</p>
 							<footer  id="access">
@@ -205,7 +205,7 @@
 							</div>							<header>
 							<h3>Guides</h3>
 							</header>
-							<p  style="color:black"> 
+							<p  style="color:black;text-align:center"> 
 								Step by step guides for installing the toolchain.
 							</p>
 							<footer  id="access">
