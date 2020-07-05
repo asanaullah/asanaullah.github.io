@@ -1,6 +1,4 @@
-I"��<h1 id="an-open-source-fpga-compilation-flow-using-rapidwright">An Open Source FPGA Compilation Flow using RapidWright</h1>
-
-<h2 id="aim">Aim</h2>
+I"'�<h2 id="aim">Aim</h2>
 <p>In this project, our aim is to use RapidWright to build a basic open source compilation flow for the 7 series Xilinx FPGAs. The flow is not meant to be complete and comprehensive. Rather, it is aimed at providing insights into the hardware generation process.</p>
 
 <h2 id="status">Status</h2>
@@ -231,7 +229,7 @@ make <span class="nt">-j</span><span class="si">$(</span><span class="nb">nproc<
 
 <h4 id="to-simplify-our-discussion-in-the-rest-of-this-document-we-will-refer-to-rapidwright-objects-as-object_name-instead-of-object_name-object-"><ins>To simplify our discussion in the rest of this document, we will refer to RapidWright objects as “<strong>Object_Name</strong>” instead of “<strong>Object_Name</strong> object”. </ins></h4>
 
-<p><img src="/images/PNR/basic-hardware-generation/hierarchy.PNG" alt="Simplified hierarchy of objects in RapidWright" /></p>
+<p><img src="/images/blog/PNR/basic-hardware-generation/hierarchy.PNG" alt="Simplified hierarchy of objects in RapidWright" /></p>
 
 <h2 id="common-packages">Common Packages</h2>
 <p>Let’s start by importing some Classes from commonly used Packages. A brief overview of each Class is given in the <a href="http://www.rapidwright.io/javadoc/index.html">documentation</a>, as well as our quick object reference section above. For simplicity’s sake, we have grouped almost all imported Classes at the beginning, even though they were added as needed during code development.</p>
@@ -668,7 +666,7 @@ make <span class="nt">-j</span><span class="si">$(</span><span class="nb">nproc<
 
 <p>Doing so requires knowledge of how the I/O <em>Sites</em> in Xilinx 7-Series FPGAs are structured (shown in the image below). The specific <strong>EDIFCellInst</strong> we are interested in connects to the chip pin’s <em>PAD</em> using a single <strong>SiteWire</strong>. If we can find the <strong>EDIFNet</strong> corresponding to this connection, we can find the two <strong>EDIFPortInst</strong>s in this <strong>EDIFNet</strong>. And once we know the <strong>EDIFPortInst</strong>s, we can get the <strong>EDIFCellInst</strong>s they belong to. Note that since the chip pin’s <em>PAD</em> is not connected to an <strong>EDIFCellInst</strong>, there will be only one result in our search. Let’s look at how this will be done using RapidWright APIs.</p>
 
-<p><img src="https://github.com/asanaullah/images/blob/master/pnr/0/iopad.PNG" alt="Xilinx 7-Series IO PAD" /></p>
+<p><img src="/images/blog/PNR/basic-hardware-generation/iopad.PNG" alt="Xilinx 7-Series IO PAD" /></p>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
 <span class="k">def</span> <span class="nf">placeIOBuffers</span><span class="p">(</span><span class="n">design</span> <span class="p">,</span> <span class="n">constraints</span><span class="p">):</span>
@@ -838,7 +836,7 @@ make <span class="nt">-j</span><span class="si">$(</span><span class="nb">nproc<
 <h3 id="create-pin-objects-for-each-net-object">Create Pin Objects For Each Net Object</h3>
 <p>The last routine adds <strong>SitePinInst</strong>s to each <strong>Net</strong>. Note that a <strong>Net</strong> connects pins of <em>Site</em>s, not <em>BEL</em>s - as discussed above, <strong>Cell</strong>s are implemented as <strong>BEL</strong>s, and there are be multiple <strong>BEL</strong>s in a single <strong>Site</strong>. Therefore, as we can see from the diagram below of a basic logic block in the Xilinx 7-Series architecture, not all <em>BEL</em> pins are directly connected to <em>Site</em> pins. The total number of <em>Site</em> pins is less than the total number of <em>BEL</em> pins, making it impossible to connect all <em>BEL</em> pins to <em>Site</em> pins simultaneously. This is why packing is a critical process: it increases the number of intra-<em>Site</em> connections so that fewer <em>BEL</em> pins that need access to <em>Site</em> pins, and thus results in higher utilization of a logic block.</p>
 
-<p><img src="https://github.com/asanaullah/images/blob/master/pnr/0/logic_block_xilinx_7_series.PNG" alt="Xilinx 7-Series Logic Block" /></p>
+<p><img src="/images/blog/PNR/basic-hardware-generation/logic_block_xilinx_7_series.PNG" alt="Xilinx 7-Series Logic Block" /></p>
 
 <p>To multiplex the limited <em>Site</em> pins, a large number of MUXs (also known as <em>Routing BELs</em>) are implemented in a logic block. By setting the appropriate <strong>SitePIP</strong> (discussed earlier) for a <em>Routing BEL</em>, we can connect a <em>BEL</em> pin to a <em>Site</em> pin, and then add the corresponding <strong>SitePinInst</strong> for this <em>Site</em> pin to the <strong>Net</strong>. The code and its breakdown is given below.</p>
 
