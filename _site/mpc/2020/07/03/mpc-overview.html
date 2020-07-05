@@ -1,0 +1,87 @@
+<!DOCTYPE HTML>
+<!--
+	Projection by TEMPLATED
+	templated.co @templatedco
+	Released for free under the Creative Commons Attribution 3.0 license (templated.co/license)
+-->
+<html>
+	<head>
+		<title>Mpc Overview</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<link rel="stylesheet" href="/assets/css/main.css" />
+	</head>
+	<body class="subpage">
+
+		<!-- Header -->
+			<header id="header">
+				<div class="inner" >
+					<p  class="logo"> <a href="index.html">Towards a Productive Ecosystem for Targetting Specialized Hardware</a></p>
+					<nav id="nav">
+						<a style="color:white;font-weight:bold;" href="../../../../index.html">Home</a>
+						<a style="color:white;font-weight:bold;" href="../../../../about.html">Overview</a>
+						<a style="color:white;font-weight:bold;" href="../../../../ML.html">FPGA ML</a>
+						<a style="color:white;font-weight:bold;" href="../../../../HLS.html">High Level Synthesis</a>
+						<a style="color:white;font-weight:bold;" href="../../../../MPC.html">Multi Party Computation</a>
+						<a style="color:white;font-weight:bold;" href="../../../../PR.html">Partial Reconfiguration</a>
+						<a style="color:white;font-weight:bold;" href="../../../../PNR.html">Project PNR</a>
+						<a style="color:white;font-weight:bold;" href="../../../../Morpheus.html">Project Morpheus</a>
+						<a style="color:white;font-weight:bold;" href="../../../../MemRe.html">Project Mem-Re</a>
+						<a style="color:white;font-weight:bold;" href="../../../../RM.html">Relational Memory</a>
+						<a style="color:white;font-weight:bold;" href="../../../../SC.html">Softcores</a>
+						<a style="color:white;font-weight:bold;" href="../../../../DM.html">Demos</a>
+						<a style="color:white;font-weight:bold;" href="../../../../people.html">People</a>
+					</nav>
+					<a href="#navPanel" class="navPanelToggle"><span class="fa fa-bars"></span></a>
+				</div>
+			</header>
+
+		<!-- Three -->
+			<section  >
+					<header class="align-center">
+						<h2>Project Overview</h2>
+					</header>
+					<h1 style = "text-align:right; color:black; margin-right:2em; font-weight:bold">03 Jul 2020 - </h1>
+					<article style="color:black; margin-left:5em; margin-right:5em">
+						
+						<p>Multi Party Computation (MPC) has been actively researched for the past 40 years because it offers the ability to use data held by several entities for calculations without needing to provide all the data to a single entity, and trusting that any provided information is not used for anything but the calculation. This lower trust requirement, as well as the ability for specific MPC protocols to protect against different quantities of passive or active opponents, is useful for healthcare, education, finance, technology, and government work. MPC implementations, typically done in software, have demonstrated these different guarantees and shown their effectiveness.</p>
+
+<p>Despite the promise of MPC, there exist a number of limitations for MPC which must be addressed before it becomes practically viable enough for widespread adoption. The most important one is a large performance gap that exists between unsecured operations and equivalent software MPC implementations; in most cases, using MPC adds too much overhead to the computation for it to be practically viable. Moreover, since MPC is typically considered communication bound, there has been little motivation to advance algorithms in order to improve the computation performance of operations; this (apparently) means that scaling up technology will not provide significant performance improvements once the communication bound has been reached. Finally, the complexity of the process results in a steep learning curve and large deployment overhead; the time and effort needed to do MPC effectively acts as a barrier to entry for developers.</p>
+
+<p>This project aims to address the above limitations of MPC through a three pronged approach:</p>
+
+<ol>
+  <li>
+    <p>Bridging the MPC-unsecured performance gap by using hardware accelerators, specifically FPGAs, to offload existing protocols. This goes beyond just implementing basic MPC circuits, and instead takes a first principles approach towards exploring how hardware (as well as the enabling infrastructure) is built, deployed, instrumented, and optimized in the context of MPC.</p>
+  </li>
+  <li>
+    <p>Improving protocols so that FPGA-MPC to the point where it becomes a co-design problem, i.e., where communication and computation are equally bound, so that performance improves in tandem with increases in both network and compute capability. This involves: i) identifying different approaches used to implement MPC in hardware, ii) identifying the benefits and limitations of limitations of these approaches, iii) mapping protocols to application contexts where they are best suited, and iv) improving the computational performance of protocols.</p>
+  </li>
+  <li>
+    <p>Facilitate the use of MPC in real-world scenarios by abstracting the complexities such as selecting protocols, adapting these protocols based on the target application context, implementing circuits, scaling these circuits based on available technology, and integrating the FPGA into the application software flow.</p>
+  </li>
+</ol>
+
+						</article>
+			</section>
+
+		<!-- Footer -->
+			<footer id="footer">
+				<div class="inner">
+
+
+					<div class="copyright">
+						&copy; Design adapted from: <a href="https://templated.co">TEMPLATED</a>
+					</div>
+
+				</div>
+			</footer>
+
+		<!-- Scripts -->
+			<script src="/assets/js/jquery.min.js"></script>
+			<script src="/assets/js/skel.min.js"></script>
+			<script src="/assets/js/util.js"></script>
+			<script src="/assets/js/main.js"></script>
+
+	</body>
+</html>

@@ -1,0 +1,86 @@
+<!DOCTYPE HTML>
+<!--
+	Projection by TEMPLATED
+	templated.co @templatedco
+	Released for free under the Creative Commons Attribution 3.0 license (templated.co/license)
+-->
+<html>
+	<head>
+		<title>Sc Overview</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<link rel="stylesheet" href="/assets/css/main.css" />
+	</head>
+	<body class="subpage">
+
+		<!-- Header -->
+			<header id="header">
+				<div class="inner" >
+					<p  class="logo"> <a href="index.html">Towards a Productive Ecosystem for Targetting Specialized Hardware</a></p>
+					<nav id="nav">
+						<a style="color:white;font-weight:bold;" href="../../../../index.html">Home</a>
+						<a style="color:white;font-weight:bold;" href="../../../../about.html">Overview</a>
+						<a style="color:white;font-weight:bold;" href="../../../../ML.html">FPGA ML</a>
+						<a style="color:white;font-weight:bold;" href="../../../../HLS.html">High Level Synthesis</a>
+						<a style="color:white;font-weight:bold;" href="../../../../MPC.html">Multi Party Computation</a>
+						<a style="color:white;font-weight:bold;" href="../../../../PR.html">Partial Reconfiguration</a>
+						<a style="color:white;font-weight:bold;" href="../../../../PNR.html">Project PNR</a>
+						<a style="color:white;font-weight:bold;" href="../../../../Morpheus.html">Project Morpheus</a>
+						<a style="color:white;font-weight:bold;" href="../../../../MemRe.html">Project Mem-Re</a>
+						<a style="color:white;font-weight:bold;" href="../../../../RM.html">Relational Memory</a>
+						<a style="color:white;font-weight:bold;" href="../../../../SC.html">Softcores</a>
+						<a style="color:white;font-weight:bold;" href="../../../../DM.html">Demos</a>
+						<a style="color:white;font-weight:bold;" href="../../../../people.html">People</a>
+					</nav>
+					<a href="#navPanel" class="navPanelToggle"><span class="fa fa-bars"></span></a>
+				</div>
+			</header>
+
+		<!-- Three -->
+			<section  >
+					<header class="align-center">
+						<h2>Project Overview</h2>
+					</header>
+					<h1 style = "text-align:right; color:black; margin-right:2em; font-weight:bold">03 Jul 2020 - </h1>
+					<article style="color:black; margin-left:5em; margin-right:5em">
+						
+						<p>Softcores are lightweight CPUs that can be implemented directly on the reconfigurable FPGA fabric, and can directly interface other parts of the fabric with low latency interconnects. There are a number of softcore offerings for FPGAs, in both the proprietary (NIOS, Mircoblaze) and open source (RISC-V, OpenPOWER) domains. Softcores provide two major benefits to applications:</p>
+
+<p>The first benefit is resource reduction. FPGAs are finite resource devices, which means that there is an opportunity cost associated with each transistor assignment. Using too many chip resources to implement one circuit may force a reduction in the functionality/parallelism of other circuits in the design, leading to poor performance, or even a failure to compile the design altogether. As workloads increase in (performance) constraints and complexity, savings from logic optimization alone may not be sufficient, and additional methods to reduce logic will be needed. Softcores provide one such method since they are sequential processors, and thus consume significantly fewer chip resources than functionally equivalent custom hardware. While entire applications cannot be implemented using softcores, due to low operating frequencies (typically 50-100MHz), softcores are ideal for implementing the application control plane. The control plane has relatively low performance constraints, making it possible to be implemented as softcore instructions instead of expensive state machines. Moreover, the low latency connectivity between softcores and the rest of the fabric enables control plane instructions to directly interact with the application data plane.</p>
+
+<p>The second benefit is faster turnaround time for application updates. If any part of a circuit (implemented on an FPGA) needs to be modified, the entire design has to be recompiled. Recompilation is an expensive operation since hardware generation can take a long time to complete, with large designs taking days to finish.  Partial Reconfiguration (PR) can help reduce the amount of hardware that must be recompiled when designs are modified, but with limited granularity and under strict constraints. Softcores address the overhead of hardware generation by removing the need to generate hardware for application updates altogether. This is because softcores are controlled by  instructions in programs and any change simply requires updating the program memory; a process orders of magnitude faster than generating hardware.</p>
+
+<p>The goal of this project is to make it easier for developers to leverage softcores for their high performance workloads. It aims to do so through two areas of exploration that have received little attention in previous work:</p>
+
+<ol>
+  <li>
+    <p>Code Partitioning: With the increasing degree of abstractions available for expressing custom hardware, such as High Level Synthesis (HLS), softcore instructions are likely to be inferred from a high level language code, instead of being explicitly specified. Therefore, this project will explore extensions to HLS compilers which can automatically : i) identify and partition the control and data planes in a high level language code, ii) generate custom hardware for the data plane, iii) generate hardware for one or more softcores for the control plane, iv) generate instructions for the softcore(s), and v) connect softcore hardware to data plane hardware.</p>
+  </li>
+  <li>
+    <p>Custom Instructions: The specification of some softcores, such as RISC-V, makes it easy to extend the ISA with custom instructions. These custom instructions are essential for effectively and efficiently expressing the complex and time-sensitive interactions that need to happen between control and data planes over specialized interfaces. However, to be able to leverage this feature requires substantial effort. The developer and/or compiler have to identify opportunities for custom instructions, extend the ISA, extend the microarchitecture, and update the entire tool flow (e.g  compilation, simulation, verification). This project will explore the design of tools which can automate the entire process outlined above, including identifying what custom instructions are needed. Moreover, it will also explore how these custom instructions can be added/updated at run time to a softcore already implemented on an FPGA, without having to do a full reconfiguration.</p>
+  </li>
+</ol>
+
+						</article>
+			</section>
+
+		<!-- Footer -->
+			<footer id="footer">
+				<div class="inner">
+
+
+					<div class="copyright">
+						&copy; Design adapted from: <a href="https://templated.co">TEMPLATED</a>
+					</div>
+
+				</div>
+			</footer>
+
+		<!-- Scripts -->
+			<script src="/assets/js/jquery.min.js"></script>
+			<script src="/assets/js/skel.min.js"></script>
+			<script src="/assets/js/util.js"></script>
+			<script src="/assets/js/main.js"></script>
+
+	</body>
+</html>

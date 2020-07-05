@@ -1,0 +1,41 @@
+I"�<p>FPGA reconfiguration is a destructive and fairly slow process. It involves erasing the configuration memory of a chip, and then loading in the bits for a new design; a process that can take minutes to complete As a result, a full device reconfiguration may not be practical for environments where designs change rapidly, or where it is not possible to halt/terminate all operations executing on the chip just to modify a subset of these operations e.g. when the FPGA is shared between multiple users.</p>
+
+<p>Partial Reconfiguration (PR) provides an alternative to full reconfiguration by supporting run-time modifications to user-defined PR regions within the FPGA fabric. This is analogous to the concept of virtualization in software. Similar to Virtual Machines (VMs), PR regions are assigned a fraction of the physical resources at creation. Users can deploy any application or workload on a PR region, and it is possible to have multiple such regions within the same device fabric. The FPGA also contains a static region (cannot be modified through PR) that has similar responsibilities as a Hypervisor, such as: i) “booting-up” the PR regions by reconfiguring them using a PR controller block, ii) multiplexing physical resources (such as external interfaces) between PR regions, iii) enforcing security policies and isolation, and iv) monitoring the status of PR regions.</p>
+
+<p>While PR can address the limitation of full reconfiguration, existing tools for PR have a number of limitations that make them difficult to use (and even impractical in some cases). Some of these include:</p>
+<ol>
+  <li>
+    <p>Process Complexity: Enabling PR support requires low level and manual management of the physical chip, both in terms of using tools to enable PR, and writing hardware to support its function. On the tooling side, the FPGA needs to be “floor-planned” i.e. the size and location of PR regions needs to be defined. This cannot be done in an arbitrary manner due to requirements such as: i) closing timing for logic in the static region, ii) ensuring access to global resources, such as IO ports and block buffers, is not inhibited by a PR region, and iii) not having more PR regions than what can be concurrently supported by the chip, since PR regions are ‘always-on’ and cannot be shut down like VMs. Moreover, variations in chip architecture and size mean that this floor-planning may need to be done multiple times to support all target FPGAs. On the hardware side, developers have to write logic such as : i) “Freeze wrappers” to hold the interfaces of PR regions in a fixed state while reconfiguration is being done, ii) state machines for reading partial bitstreams from their stored locations and driving the reconfiguration controller, and iii) the interconnect for ensuring isolation between PR regions whilst multiplexing shared resources.</p>
+  </li>
+  <li>
+    <p>Lack of Circuit Relocatability Support: Existing tools do not support circuit relocation: the capability of moving a design from one PR region to another PR region on the same FPGA, or to another PR region on a different FPGA, without having to recompile it. Currently, a design has to be compiled separately for each PR region on each FPGA that it could be deployed on, even if the PR regions have the exact same amount and organization of chip resources. This is because the physical implementation of a circuit depends not only on what logic is needed by the circuit, but also where its interfaces are located - changing the location of single wire can change the entire mapping. And since the static region is not sufficiently constrained by tools (in order to close timing faster), these interfaces are likely to be implemented in geometrically different ways.</p>
+  </li>
+  <li>
+    <p>Lack of Reliable Advancements: Previous research efforts that advance the functionality of PR tools have typically done so by manipulating vendor files generated during compilations. While this approach is effective as a short term solution, it is not reliable in the long run since it can be invalidated when vendors update their tooling.</p>
+  </li>
+</ol>
+
+<p>The goal of this project is to provide the same level of usability, reliability, security, support and functionality for PR in FPGAs, as it exists for virtualization in CPU. To achieve this, the project aims to explore the design of a number of APIs, data representations,  software tools and hardware components, such as:</p>
+<ol>
+  <li>
+    <p>APIs and data interchange formats which facilitate the introduction of additional steps in the tool flow. PR in one possible user of these extra steps. In particular, PR would require coming up with a well documented partial bitstream representation that is as generic as possible.</p>
+  </li>
+  <li>
+    <p>Tools to assist developers in floor-planning the FPGA chip, including routines for scanning the chip architecture and identifying potential PR regions that can support circuit relocatability for user specified resource requirements.</p>
+  </li>
+  <li>
+    <p>Tools that leverage APIs from (1) to further constrain the static region  beyond what is done automatically by vendor tools in order to support relocatability. This is done without having to rely on vendor generated intermediate files (or any other sources which can be changed by vendors).</p>
+  </li>
+  <li>
+    <p>Routines for reconfiguring the device from an external management plane, such as the host machine over the PCIe bus, and from an internal management plane, such as a softcore running inside the FPGA. The latter is particularly important for FPGA boards which do not support PCIe connectivity, and also for edge computing, where the FPGA is potentially deployed as a stand-alone device with only a network connection to receive new partial bitstreams.</p>
+  </li>
+  <li>
+    <p>Routines for checkpointing and relocating PR regions, so that circuit operation can resume from the last stable state (instead of from the beginning) once relocation is complete.</p>
+  </li>
+  <li>
+    <p>A framework for automatically generating the hardware components needed to support PR, based on developer specified constraints. These constraints include: how and where partial bitstreams will be stored, the mechanism through which they will be provided to the reconfiguration controller, and the security policies applied to each PR region. Generated hardware includes IP blocks for interfacing the PR interfaces, such as ICAP for Xilinx, state machine or softcores to drive these IP blocks, freeze wrappers, and an interconnect that can filter inter-PR and PR-external I/O data packets.</p>
+  </li>
+</ol>
+
+<p>Note: This project is part of Project Morpheus, which is an effort to build an open source reconfigurable hardware operating system (analogous to Linux in the software world).</p>
+:ET
