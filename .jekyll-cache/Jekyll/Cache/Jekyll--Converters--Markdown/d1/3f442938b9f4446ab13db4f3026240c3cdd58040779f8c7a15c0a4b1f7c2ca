@@ -1,0 +1,239 @@
+I"/y<h2 id="overview">Overview</h2>
+<p>The goal of the <a href="https://github.com/ZipCPU/zipvera">ZipVersa</a> project is to demonstrate how a completely open source tool chain can be used to compile HDL designs, including a RISCV core, to a Lattice ECP5-5G Versa FPGA board.</p>
+
+<p>In Part 1 of the demo, we will manually walk through the process and describe how to get example projects/simulations up and running.</p>
+
+<p>In Part 2 of the demo, we will write proper scripts for doing the steps in Part 1.</p>
+
+<h2 id="os">OS</h2>
+<p>Fedora Release 30</p>
+
+<h2 id="board">Board</h2>
+<p>Lattice ECP-5G Versa Board with Micron Flash 
+(support for Macronix flash is under development)</p>
+
+<h2 id="hardware-setup">Hardware Setup</h2>
+<p>The ZipVersa design currently supports UDP based networking using Ethernet Port 1 of the Lattice board (i.e. the port closer to the USB cable). There are two major limitations to this support: 1) no DHCP support i.e. requires a static IP to be assigned for the FPGA, and 2) no Tri-Speed Ethernet MAC i.e. it can only operate at 1Gbps. If you have a router with 1Gbps LAN ports, simply connect the board and host machine to it, set up the DNS, and you should be good to go.</p>
+
+<p>In my case, the router had 100Mbps LAN ports. Since only the FPGA has a hard requirement for a 1Gbps link, I simply cascaded the router with a switch (instead of buying a new router) as shown in the figure below. Now, the FPGA and host talk to the switch over a 1Gbps link, while the link to the router is 100Mbps.</p>
+
+<p><img src="/images/blog/DM/zipversa-demo-part-1/hardware_overview.png" alt="alt text" /></p>
+
+<p>Link status can be easily verified by running</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>./netstat
+</code></pre></div></div>
+<p>from <code class="highlighter-rouge">zipversa/sw/host</code> once the design has been loaded.</p>
+
+<h2 id="before-you-begin">Before You Begin</h2>
+<h4 id="verify-jumper-placement">Verify Jumper Placement</h4>
+<p>From  <a href="https://github.com/SymbiFlow/prjtrellis/blob/master/examples/versa5g/README.md">Project Trellis</a>: “If your Versa board is new, you will need to change J50 to bypass the iSPclock. Rearrange the jumpers to connect pins 1-2 and 3-5 (leaving one jumper spare).”
+See page 20 of the <a href="https://www.mouser.com/catalog/additional/Lattice_EB98.pdf">user guide</a>.</p>
+<h4 id="verify-flash-device">Verify Flash Device</h4>
+<p>The flash controller is configured to run in QUAD I/O XIP mode and uses commands specific to the Micron N25Q128A flash device. While the Macronix flash device has similar commands, it does not support XIP mode. Therefore, the design currently only works with Micron N25Q128A flash devices (or a device with XIP support and the same commands as Micron)</p>
+<h4 id="verify-network-connectivity">Verify Network Connectivity</h4>
+<p>Verify IP addresses of the testbed, as well as MAC address of the board. Ensure that the networking hardware, including cables, support Gigabit ethernet.</p>
+<h4 id="verify-host-connectivity">Verify Host Connectivity</h4>
+<p>Ensure that your machine can see the FPGA via the USB cable. Running <code class="highlighter-rouge">lsusb</code> should print out something along the lines of:</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Bus 001 Device 003: ID 0403:6010 Future Technology Devices International, Ltd FT2232C/D/H Dual UART/FIFO IC
+</code></pre></div></div>
+
+<h2 id="demo-walkthrough">Demo Walkthrough</h2>
+
+<h4 id="ip-and-mac-addresses">IP and MAC Addresses</h4>
+<p>Next we add in our custom network parameters for the FPGA static IP4 address (<code class="highlighter-rouge">DEVIP</code>), host machine IP4 address (<code class="highlighter-rouge">HOSTIP</code>), gateway IP4 address (<code class="highlighter-rouge">ROUTERIP</code>), FPGA MAC address (<code class="highlighter-rouge">DEVMAC</code>) and the subnet mask (<code class="highlighter-rouge">MASK</code>).</p>
+
+<p>If you are running this project using QEMU/KVM, the <code class="highlighter-rouge">ROUTERIP</code> is the physical gateway and <code class="highlighter-rouge">HOSTIP</code> is the virtual IP4 address for the VM.</p>
+
+<p><code class="highlighter-rouge">DEVMAC</code> is currently taken as is from the original ZipVersa project.</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">DEVIP</span><span class="o">=</span><span class="p">(</span><span class="mi">192</span> <span class="mi">168</span> <span class="mi">8</span> <span class="mi">10</span><span class="p">)</span>
+<span class="n">HOSTIP</span><span class="o">=</span><span class="p">(</span><span class="mi">192</span> <span class="mi">168</span> <span class="mi">8</span> <span class="mi">100</span><span class="p">)</span>
+<span class="n">ROUTERIP</span><span class="o">=</span><span class="p">(</span><span class="mi">192</span> <span class="mi">168</span> <span class="mi">8</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">DEVMAC</span><span class="o">=</span><span class="s">"a25345b6fb5e"</span>
+<span class="n">MASK</span><span class="o">=</span><span class="p">(</span><span class="s">"FF"</span> <span class="s">"FF"</span> <span class="s">"FF"</span> <span class="s">"00"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h4 id="select-tty-device">Select TTY Device</h4>
+<p>Next we select the FPGA tty device. This will be the serial port used to communicate with the FPGA once the ZipVersa base design has been loaded. In my case, this was <code class="highlighter-rouge">ttyUSB1</code>.</p>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">UBP</span><span class="o">=</span><span class="err">$</span><span class="p">(</span><span class="n">ls</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span> <span class="o">|</span> <span class="n">grep</span> <span class="s">"ttyUSB1"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h4 id="yosys">YOSYS</h4>
+<p>Now that we are all set with specifying our testbed specific parameters, let’s get to setting up the environment. First up is Yosys, an open source synthesis tool. It compiles the HDL source files and generates a netlist (JSON format in our case) for the target device. The design is optimized using the Berkley ABC optimizer.</p>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">dnf</span> <span class="o">-</span><span class="n">y</span> <span class="n">groupinstall</span> <span class="s">"Development Tools"</span> <span class="s">"Development Libraries"</span>
+<span class="n">dnf</span> <span class="o">-</span><span class="n">y</span> <span class="n">install</span> <span class="n">cmake</span> <span class="n">clang</span> <span class="n">bison</span> <span class="n">flex</span> <span class="n">mercurial</span> <span class="n">gperf</span> <span class="n">tcl</span><span class="o">-</span><span class="n">devel</span> <span class="n">libftdi</span><span class="o">-</span><span class="n">devel</span> <span class="n">python</span><span class="o">-</span><span class="n">xdot</span> <span class="n">graphviz</span>
+<span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="o">:</span><span class="c1">//github.com/YosysHQ/yosys.git</span>
+<span class="n">cd</span> <span class="n">yosys</span>
+<span class="n">make</span> <span class="o">-</span><span class="n">j</span><span class="err">$</span><span class="p">(</span><span class="n">nproc</span><span class="p">)</span>
+<span class="n">make</span> <span class="n">install</span>
+<span class="n">cd</span> <span class="p">..</span>
+</code></pre></div></div>
+
+<h4 id="boostpython-3">Boost.Python 3</h4>
+<p>Next we install Boost.Python 3, which is needed by Project Trellis.</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">dnf</span> <span class="o">-</span><span class="n">y</span> <span class="n">install</span> <span class="n">boost</span><span class="o">-</span><span class="n">python3</span><span class="o">-</span><span class="n">devel</span>
+</code></pre></div></div>
+
+<h4 id="project-trellis">Project Trellis</h4>
+<p>Project Trellis is the database containing the reverse engineered low-level layout of the Lattice ECP5 boards. This database is what allowed open source Place and Route tools, such as Nextpnr (below), to generate the FPGA bitstream from a Yosys netlist output. Installing Project Trellis requires cloning two separate repositories as shown below. The target installation directory can be specified using <code class="highlighter-rouge">-DCMAKE_INSTALL_PREFIX</code> when running <code class="highlighter-rouge">cmake</code>.</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">git</span> <span class="n">clone</span> <span class="o">--</span><span class="n">recursive</span> <span class="n">https</span><span class="o">:</span><span class="c1">//github.com/SymbiFlow/prjtrellis</span>
+<span class="n">cd</span> <span class="n">prjtrellis</span>
+<span class="n">rm</span> <span class="o">-</span><span class="n">rf</span> <span class="n">database</span>
+<span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="o">:</span><span class="c1">//github.com/SymbiFlow/prjtrellis-db database</span>
+<span class="n">cd</span> <span class="n">libtrellis</span>
+<span class="n">cmake</span> <span class="o">-</span><span class="n">DCMAKE_INSTALL_PREFIX</span><span class="o">=/</span><span class="n">usr</span> <span class="p">.</span>
+<span class="n">make</span>
+<span class="n">make</span> <span class="n">install</span>
+<span class="n">cd</span> <span class="p">..</span><span class="o">/</span><span class="p">..</span>
+</code></pre></div></div>
+
+<h4 id="nextpnr">Nextpnr</h4>
+<p>As mentioned above, Nextpnr is an open source Place&amp;Route tool. It maps the logical layout and connectivity of the synthesized design to an actual set of Look Up Tables (LUTs) and wires/switch-fabric in the FPGA. Place &amp; Route is more time consuming than synthesis, and a harder problem to open source since the physical layout of the FPGA boards is typically proprietary.</p>
+
+<p>Using the <code class="highlighter-rouge">-DARCH</code> flag, we configure it for the ECP5 board. If Project Trellis was installed in a custom folder, then modify <code class="highlighter-rouge">-DTRELLIS_ROOT</code> to specify this location.</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">dnf</span> <span class="o">-</span><span class="n">y</span> <span class="n">install</span> <span class="n">eigen3</span><span class="o">-</span><span class="n">devel</span> <span class="n">qt5</span><span class="o">-</span><span class="n">devel</span>
+<span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="o">:</span><span class="c1">//github.com/YosysHQ/nextpnr.git</span>
+<span class="n">cd</span> <span class="n">nextpnr</span>
+<span class="n">cmake</span> <span class="o">-</span><span class="n">DARCH</span><span class="o">=</span><span class="n">ecp5</span> <span class="o">-</span><span class="n">DTRELLIS_ROOT</span><span class="o">=/</span><span class="n">usr</span><span class="o">/</span><span class="n">share</span><span class="o">/</span><span class="n">trellis</span>
+<span class="n">make</span> <span class="o">-</span><span class="n">j</span><span class="err">$</span><span class="p">(</span><span class="n">nproc</span><span class="p">)</span>
+<span class="n">make</span> <span class="n">install</span>
+<span class="n">cd</span> <span class="p">..</span>
+</code></pre></div></div>
+
+<h4 id="openocd">OpenOCD</h4>
+<p>Finally, we install OpenOCD which allows the bitstream, generated above, to be downloaded onto the FPGA board. For this demo, we build OpenOCD from source using the commands below. Once OpenOCD is set up, one can start to deploy custom designs for the FPGA. Project Trellis has a few example you could try.</p>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">tar</span> <span class="o">-</span><span class="n">xf</span> <span class="n">openocd</span><span class="o">-</span><span class="mi">0</span><span class="p">.</span><span class="mi">10</span><span class="p">.</span><span class="mi">0</span><span class="p">.</span><span class="n">tar</span><span class="p">.</span><span class="n">bz2</span>
+<span class="n">cd</span> <span class="n">openocd</span><span class="o">-</span><span class="mi">0</span><span class="p">.</span><span class="mi">10</span><span class="p">.</span><span class="mi">0</span>
+<span class="p">.</span><span class="o">/</span><span class="n">configure</span>  <span class="o">--</span><span class="n">enable</span><span class="o">-</span><span class="n">ft2232_libftdi</span> <span class="o">--</span><span class="n">enable</span><span class="o">-</span><span class="n">libusb0</span> <span class="o">--</span><span class="n">disable</span><span class="o">-</span><span class="n">werror</span>
+<span class="n">make</span>
+<span class="n">make</span> <span class="n">install</span>
+<span class="n">cd</span> <span class="p">..</span>
+</code></pre></div></div>
+<p>The rest of this demo is going to set up dependencies for the ZipVersa project and run an example design.</p>
+
+<h4 id="riscv-gnu-toolchain">RISCV GNU Toolchain</h4>
+<p>The example designs in Project Trellis use assembly language to code for the PicoRV RISC-V core. As designs get more sophisticated, a C/C++ compiler is needed for the RISC-V. Enter the RISCV GNU toolchain. We install the toolchain for a 32 bit integer instruction set architecture (<code class="highlighter-rouge">--with-arch=rv32i</code>) and a programming model with 32 bit data types ints/long/pointers (<code class="highlighter-rouge">--with-abi=ilp32</code>).</p>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">dnf</span> <span class="o">-</span><span class="n">y</span> <span class="n">install</span> <span class="n">autoconf</span> <span class="n">automake</span> <span class="n">libmpc</span><span class="o">-</span><span class="n">devel</span> <span class="n">mpfr</span><span class="o">-</span><span class="n">devel</span> <span class="n">gmp</span><span class="o">-</span><span class="n">devel</span> <span class="n">gawk</span>  <span class="n">bison</span> <span class="n">flex</span> <span class="n">texinfo</span> <span class="n">patchutils</span> <span class="n">gcc</span> <span class="n">gcc</span><span class="o">-</span><span class="n">c</span><span class="o">++</span> <span class="n">zlib</span><span class="o">-</span><span class="n">devel</span> <span class="n">expat</span><span class="o">-</span><span class="n">devel</span>
+<span class="n">git</span> <span class="n">clone</span> <span class="o">--</span><span class="n">recursive</span> <span class="n">https</span><span class="o">:</span><span class="c1">//github.com/riscv/riscv-gnu-toolchain</span>
+<span class="n">cd</span>  <span class="n">riscv</span><span class="o">-</span><span class="n">gnu</span><span class="o">-</span><span class="n">toolchain</span>
+<span class="p">.</span><span class="o">/</span><span class="n">configure</span> <span class="o">--</span><span class="n">prefix</span><span class="o">=/</span><span class="n">opt</span><span class="o">/</span><span class="n">riscv</span> <span class="o">--</span><span class="n">with</span><span class="o">-</span><span class="n">arch</span><span class="o">=</span><span class="n">rv32i</span> <span class="o">--</span><span class="n">with</span><span class="o">-</span><span class="n">abi</span><span class="o">=</span><span class="n">ilp32</span>
+<span class="n">make</span>        
+<span class="n">export</span> <span class="n">PATH</span><span class="o">=</span><span class="s">"$PATH:/opt/riscv/bin"</span>
+<span class="n">cd</span> <span class="p">..</span>
+</code></pre></div></div>
+
+<h4 id="simulation-tools">Simulation Tools</h4>
+<p>Verilator is an open source RTL simulation tool while Gtkwave allows us to plot the signal waveforms. Of these, Verilator is required to build the ZipVersa project.</p>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">dnf</span> <span class="o">-</span><span class="n">y</span> <span class="n">install</span> <span class="n">verilator</span>
+<span class="n">dnf</span> <span class="o">-</span><span class="n">y</span> <span class="n">install</span> <span class="n">gtkwave</span>
+</code></pre></div></div>
+
+<h4 id="autofpga">AutoFPGA</h4>
+<p>“The goal of AutoFPGA is to be able to run it with a list of peripheral definition files, given on the command line, and to thus be able to generate (or update?) the various board definition files.”</p>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="o">:</span><span class="c1">//github.com/ZipCPU/autofpga</span>
+<span class="n">cd</span> <span class="n">autofpga</span><span class="o">/</span>
+<span class="n">make</span>
+<span class="n">export</span> <span class="n">PATH</span><span class="o">=</span><span class="s">"$PATH:$PWD/sw"</span>
+<span class="n">cd</span> <span class="p">..</span>
+</code></pre></div></div>
+
+<h4 id="elf-utils">ELF Utils</h4>
+<p>Libelf is needed to build the applications in <code class="highlighter-rouge">sw/host</code>.</p>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">git</span> <span class="n">clone</span> <span class="n">git</span><span class="o">:</span><span class="c1">//sourceware.org/git/elfutils.git</span>
+<span class="n">cd</span> <span class="n">elfutils</span>
+<span class="n">autoreconf</span> <span class="o">-</span><span class="n">i</span> <span class="o">-</span><span class="n">f</span>
+<span class="p">.</span><span class="o">/</span><span class="n">configure</span> <span class="o">--</span><span class="n">enable</span><span class="o">-</span><span class="n">maintainer</span><span class="o">-</span><span class="n">mode</span> <span class="o">--</span><span class="n">disable</span><span class="o">-</span><span class="n">debuginfod</span>
+<span class="n">make</span>
+<span class="n">make</span> <span class="n">check</span>
+<span class="n">make</span> <span class="n">install</span>
+<span class="n">cd</span> <span class="p">..</span>
+</code></pre></div></div>
+
+<h4 id="ncurses">NCURSES</h4>
+<p>Needed to build <code class="highlighter-rouge">zipdbg</code> in <code class="highlighter-rouge">sw/host</code>.</p>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">dnf</span> <span class="o">-</span><span class="n">y</span> <span class="n">install</span> <span class="n">ncurses</span><span class="o">-</span><span class="n">devel</span>
+</code></pre></div></div>
+
+<h4 id="zipversa">ZipVersa</h4>
+<p>Now that we have set up our environment, we can now get to building the actual ZipVersa project.</p>
+<h5 id="clone-git">Clone Git</h5>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="o">:</span><span class="c1">//github.com/asanaullah/zipversa</span>
+<span class="n">cd</span> <span class="n">zipversa</span><span class="o">/</span>
+</code></pre></div></div>
+
+<h5 id="update-network-addresses">Update Network Addresses</h5>
+<p>Using the <code class="highlighter-rouge">sed</code> command, update the network parameters specified above.</p>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">sed</span> <span class="o">-</span><span class="n">i</span> <span class="s">"58d"</span> <span class="n">sw</span><span class="o">/</span><span class="n">rv32</span><span class="o">/</span><span class="n">etcnet</span><span class="p">.</span><span class="n">h</span>
+<span class="n">sed</span> <span class="o">-</span><span class="n">i</span> <span class="s">"58i #define	DEFAULTMAC	0x${DEVMAC}ul"</span> <span class="n">sw</span><span class="o">/</span><span class="n">rv32</span><span class="o">/</span><span class="n">etcnet</span><span class="p">.</span><span class="n">h</span>
+<span class="n">sed</span> <span class="o">-</span><span class="n">i</span> <span class="s">"66d"</span> <span class="n">sw</span><span class="o">/</span><span class="n">rv32</span><span class="o">/</span><span class="n">etcnet</span><span class="p">.</span><span class="n">h</span>
+<span class="n">sed</span> <span class="o">-</span><span class="n">i</span> <span class="s">"66i #define	DEFAULTIP	IPADDR(${DEVIP[0]},${DEVIP[1]},${DEVIP[2]},${DEVIP[3]})"</span> <span class="n">sw</span><span class="o">/</span><span class="n">rv32</span><span class="o">/</span><span class="n">etcnet</span><span class="p">.</span><span class="n">h</span>
+<span class="n">sed</span> <span class="o">-</span><span class="n">i</span> <span class="s">"72d"</span> <span class="n">sw</span><span class="o">/</span><span class="n">rv32</span><span class="o">/</span><span class="n">etcnet</span><span class="p">.</span><span class="n">h</span>
+<span class="n">sed</span> <span class="o">-</span><span class="n">i</span> <span class="s">"72i #define	LCLNETMASK 0x${MASK[0]}${MASK[1]}${MASK[2]}${MASK[3]}"</span> <span class="n">sw</span><span class="o">/</span><span class="n">rv32</span><span class="o">/</span><span class="n">etcnet</span><span class="p">.</span><span class="n">h</span>
+<span class="n">sed</span> <span class="o">-</span><span class="n">i</span> <span class="s">"77d"</span> <span class="n">sw</span><span class="o">/</span><span class="n">rv32</span><span class="o">/</span><span class="n">etcnet</span><span class="p">.</span><span class="n">h</span>
+<span class="n">sed</span> <span class="o">-</span><span class="n">i</span> <span class="s">"77i #define	DEFAULT_ROUTERIP	IPADDR(${ROUTERIP[0]},${ROUTERIP[1]},${ROUTERIP[2]},${ROUTERIP[3]})"</span> <span class="n">sw</span><span class="o">/</span><span class="n">rv32</span><span class="o">/</span><span class="n">etcnet</span><span class="p">.</span><span class="n">h</span>
+<span class="n">sed</span> <span class="o">-</span><span class="n">i</span> <span class="s">"148d"</span> <span class="n">sw</span><span class="o">/</span><span class="n">host</span><span class="o">/</span><span class="n">udpsocket</span><span class="p">.</span><span class="n">cpp</span>
+<span class="n">sed</span> <span class="o">-</span><span class="n">i</span> <span class="s">"148i 	getaddrinfo(</span><span class="se">\"</span><span class="s">${HOSTIP[0]}.${HOSTIP[1]}.${HOSTIP[2]}.${HOSTIP[3]}</span><span class="se">\"</span><span class="s">, portstr, &amp;hints, &amp;res);"</span> <span class="n">sw</span><span class="o">/</span><span class="n">host</span><span class="o">/</span><span class="n">udpsocket</span><span class="p">.</span><span class="n">cpp</span>
+<span class="n">sed</span> <span class="o">-</span><span class="n">i</span> <span class="s">"208d"</span> <span class="n">sw</span><span class="o">/</span><span class="n">host</span><span class="o">/</span><span class="n">testfft</span><span class="p">.</span><span class="n">cpp</span>
+<span class="n">sed</span> <span class="o">-</span><span class="n">i</span> <span class="s">"208i 	UDPSOCKET *skt = new UDPSOCKET(</span><span class="se">\"</span><span class="s">${DEVIP[0]}.${DEVIP[1]}.${DEVIP[2]}.${DEVIP[3]}</span><span class="se">\"</span><span class="s">);"</span> <span class="n">sw</span><span class="o">/</span><span class="n">host</span><span class="o">/</span><span class="n">testfft</span><span class="p">.</span><span class="n">cpp</span>
+</code></pre></div></div>
+
+<h5 id="build-project">Build Project</h5>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">make</span>
+</code></pre></div></div>
+
+<h5 id="program-board">Program Board</h5>
+<p>Make sure that the <code class="highlighter-rouge">ecp5-versa.cfg</code> matches your board. If not, find the appropriate one in <code class="highlighter-rouge">/usr/share/trellis/misc/openocd</code> and link to that.</p>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">openocd</span> <span class="o">-</span><span class="n">f</span> <span class="n">ecp5</span><span class="o">-</span><span class="n">versa</span><span class="p">.</span><span class="n">cfg</span> <span class="o">-</span><span class="n">c</span> <span class="s">"transport select jtag; init; svf rtl/zipversa.svf; exit"</span>
+</code></pre></div></div>
+
+<h5 id="start-uart-connection">Start UART Connection</h5>
+<p>While we could have started this as a background process in the same terminal, it throws out a lot of garbage values which make it difficult to read the actual board responses. <code class="highlighter-rouge">gnome-terminal</code> wasn’t working for me so I ran it using <code class="highlighter-rouge">xterm</code> instead. Note that unless <code class="highlighter-rouge">netuart</code> is run, the board will not respond.</p>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">dnf</span> <span class="o">-</span><span class="n">y</span> <span class="n">install</span> <span class="n">xterm</span>
+<span class="n">cd</span> <span class="n">sw</span><span class="o">/</span><span class="n">host</span>
+<span class="n">xterm</span> <span class="o">-</span><span class="n">hold</span>  <span class="o">-</span><span class="n">e</span> <span class="p">.</span><span class="o">/</span><span class="n">netuart</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="err">$</span><span class="n">UBP</span><span class="o">&amp;</span>
+</code></pre></div></div>
+
+<h5 id="load-fft-design-for-picorv">Load FFT design for PicoRV</h5>
+<p>This checks the board flash memory to see if it matches the FFT program. If so, the command completes. Otherwise, sector by sector, the memory is erased and the FFT program is written.</p>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">.</span><span class="o">/</span><span class="n">zipload</span> <span class="p">..</span><span class="o">/</span><span class="n">rv32</span><span class="o">/</span><span class="n">fftmain</span>
+</code></pre></div></div>
+<p>Note that once the flash memory has been programmed, the design will start executing. It will send out ARP packets to determine MAC addresses of the router. This does not mean that the actual FFT has started executing. Doing so requires running the host application (shown below). The other two example designs (pingtest, gettysburg) do not require a host application.</p>
+
+<p>Also note that it is likely that there will be a couple of failed attempts to get the MAC address; this is fine. If, however, the <code class="highlighter-rouge">xterm</code> window opened earlier continues to print that the ARP-lookup failed, double check the network parameters specified in the beginning and run <code class="highlighter-rouge">./netstat</code> to verify that the link is 1000Mbps.</p>
+
+<h5 id="run-fft-application">Run FFT Application</h5>
+<p>Running <code class="highlighter-rouge">./testfft</code> causes the board to send out ARP-packets again, this time trying to get the MAC address of the host machine. Then the <code class="highlighter-rouge">testfft</code> application sends the board four impulse functions, which computes the FFT, and returns the transforms back to the host.</p>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">.</span><span class="o">/</span><span class="n">testfft</span>
+</code></pre></div></div>
+<p>The figure below shows an example result of loading the FFT program onto the board and running the host application. Note that the errors seen are due to a mismatch in the operating frequencies of the RISCV core and the network controller. This should not significantly impact the observed waveforms in the next step. \</p>
+
+<p><img src="/images/blog/DM/zipversa-demo-part-1/fft_uart_display.png" alt="alt text" /></p>
+
+<h5 id="display-results-returned-by-fpga">Display results returned by FPGA</h5>
+<p>Finally, we plot the waveforms for the four returned transforms.</p>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">dnf</span> <span class="o">-</span><span class="n">y</span> <span class="n">install</span> <span class="n">octave</span>
+<span class="n">octave</span> <span class="p">.</span><span class="o">/</span><span class="n">chkfftresults</span><span class="p">.</span><span class="n">m</span> 
+</code></pre></div></div>
+
+<h5 id="other-example-designs">Other Example Designs</h5>
+<p>Execute from <code class="highlighter-rouge">zipversa/sw/host</code>. Ensure that <code class="highlighter-rouge">netuart</code> is running.</p>
+<ul>
+  <li>
+    <p>Gettysburg:
+<code class="highlighter-rouge">./zipload ../rv32/gettysburg</code>
+This will print out the Gettysburg address on the <code class="highlighter-rouge">netuart</code> terminal.</p>
+  </li>
+  <li>
+    <p>Ping Test:
+<code class="highlighter-rouge">./zipload ../rv32/pingtest</code>
+This will ping the router and print the results on the <code class="highlighter-rouge">netuart</code> terminal.</p>
+  </li>
+</ul>
+
+<h4 id="simulation">Simulation</h4>
+<p>From <code class="highlighter-rouge">zipversa/sim/verilated/README.md</code>:
+“To run the simulation , first kill any <code class="highlighter-rouge">netuart</code>s that might be running, and then run <code class="highlighter-rouge">main_tb</code>.  <code class="highlighter-rouge">main_tb</code> may also be given an argument, which is the name of any (ELF) program to run within the CPU within.  This program will then be loaded into design memory, and the design will begin as though it were already loaded at startup.  For example, <code class="highlighter-rouge">main_tb ../../sw/rv32/fftsimtest</code> will run a simulated-based test of the internal FFT.  A <code class="highlighter-rouge">-d</code> flag may also be used to generate a <code class="highlighter-rouge">.vcd</code> trace file as well for debugging purposes.  Do be aware, this trace faile can become quite large.  (I usually kill the simulation before it gets to 20GB.)”</p>
+:ET
